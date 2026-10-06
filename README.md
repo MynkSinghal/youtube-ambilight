@@ -41,7 +41,7 @@ With a score lower than 1000 the extension will still work but it is likely that
 | -------- | ------- | ------ |
 | Chromium | 80      | [Optional chaining operator (?.)](https://caniuse.com/mdn-javascript_operators_optional_chaining) |
 | Firefox  | 74      | [Optional chaining operator (?.)](https://caniuse.com/mdn-javascript_operators_optional_chaining) |
-| Safari   | 17      | [WebGL in OffscreenCanvas](https://caniuse.com/offscreencanvas), [Fullscreen API](https://caniuse.com/fullscreen) and [requestVideoFrameCallback](https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback) (macOS, and iPadOS when YouTube is opened as a desktop website) |
+| Safari   | 18      | [Content scripts in the main world](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/content_scripts#world) (macOS, and iPadOS when YouTube is opened as a desktop website) |
 
 
 ## Privacy & Security
@@ -86,6 +86,7 @@ Safari extensions are distributed inside a macOS/iOS app, which requires a Mac w
 6. After you've modified a file in the `/src` folder enter `npm run build:safari` in the terminal and run the app in Xcode again. The Xcode project references the `/dist-safari` folder, so it does not have to be regenerated.
 
 The Safari version is built from the same source code. The differences are in the manifest (see `safari-build.js`):
+- Safari does not allow the YouTube page to load files of the extension (`web_accessible_resources`). So the manifest injects `content.css` as a content script stylesheet and `injected.js` as a content script in the main world, and images are passed to the page as data urls (see `extension-resources.js`).
 - `content-main.js` is loaded as a content script, because Safari does not support dynamic imports in content scripts.
 - Additional icon sizes, which are also used for the app icon.
 - The settings page opens in a tab, because file dialogs and downloads close the popup in Safari.

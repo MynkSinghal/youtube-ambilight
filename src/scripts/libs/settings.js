@@ -18,6 +18,7 @@ import SettingsConfig, {
 import { getFeedbackFormLink, getVersion } from './utils';
 import { storage } from './storage';
 import { AmbientlightError } from './errors/ambient-light-error';
+import { getPageResourceUrl } from './extension-resources';
 
 export const FRAMESYNC_DECODEDFRAMES = 0;
 export const FRAMESYNC_DISPLAYFRAMES = 1;
@@ -28,7 +29,6 @@ export const DEBANDING_BLEND_MODE_OLED = 1;
 
 const feedbackFormLink = getFeedbackFormLink(); // document.currentScript?.getAttribute('data-feedback-form-link')
 //  || 'https://docs.google.com/forms/d/e/1FAIpQLSe5lenJCbDFgJKwYuK_7U_s5wN3D78CEP5LYf2lghWwoE9IyA/viewform'
-const baseUrl = chrome.runtime.getURL('') || ''; // document.currentScript?.getAttribute('data-base-url') || ''
 const version = getVersion(); // document.currentScript?.getAttribute('data-version') || ''
 
 const getSettingQuerySelector = (name) =>
@@ -442,7 +442,11 @@ But if this happens frequently, here are some possible causes:
     donateLinkImage.className = 'ytpa-donate-link__image';
     donateLinkImage.alt = 'Support me via a donation';
     donateLinkImage.title = 'Support me via a donation';
-    donateLinkImage.src = `${baseUrl}images/donate.svg`;
+    const donateImageUrl = getPageResourceUrl(
+      'images/donate.svg',
+      (url) => (donateLinkImage.src = url)
+    );
+    if (donateImageUrl) donateLinkImage.src = donateImageUrl;
     donateLinkImage.height = '23';
     donateLink.appendChild(donateLinkImage);
 

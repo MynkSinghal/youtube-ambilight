@@ -10,9 +10,9 @@ const xcodeProjectDir = 'safari';
 const appName = 'Ambient light for YouTube';
 const bundleIdentifier =
   process.env.SAFARI_BUNDLE_IDENTIFIER || 'com.wesselkroos.youtube-ambilight';
-// Safari 17: WebGL in OffscreenCanvas, unprefixed fullscreen API and
-// requestVideoFrameCallback. Older versions fall back where possible.
-const safariMinVersion = '17.0';
+// Safari 18: content_scripts world MAIN (Safari 17: WebGL in OffscreenCanvas,
+// unprefixed fullscreen API and requestVideoFrameCallback)
+const safariMinVersion = '18.0';
 
 if (!existsSync(`${srcDir}/manifest.json`))
   throw new Error(
@@ -44,14 +44,27 @@ manifest.icons = {
   512: 'images/icon-512.png',
 };
 
-// Safari does not support dynamic imports in content scripts.
-// Load content-main.js as a content script right after content.js instead.
+// Safari does not allow the YouTube page to load files of the extension
+// (web_accessible_resources), and does not support dynamic imports in
+// content scripts. So the manifest injects all these files instead:
+// - styles/content.css as a content script stylesheet
+// - scripts/content-main.js as a content script right after content.js
+// - scripts/injected.js as a content script in the main world of the page
+const mainWorldContentScripts = [];
 for (const contentScript of manifest.content_scripts) {
   const index = contentScript.js.indexOf('scripts/content.js');
   if (index === -1) continue;
 
   contentScript.js.splice(index + 1, 0, 'scripts/content-main.js');
+  contentScript.css = [...(contentScript.css ?? []), 'styles/content.css'];
+  mainWorldContentScripts.push({
+    ...contentScript,
+    css: undefined,
+    js: ['scripts/injected.js'],
+    world: 'MAIN',
+  });
 }
+manifest.content_scripts.push(...mainWorldContentScripts);
 
 // File dialogs and downloads close the popup in Safari
 manifest.options_ui.open_in_tab = true;

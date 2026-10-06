@@ -47,8 +47,7 @@ import Stats from './stats';
 import { getBrowser } from './utils';
 import { injectedScript } from './messaging/injected';
 import { getNodeTreeString, getPageElems } from './errors/dom';
-
-const baseUrl = chrome.runtime.getURL('') || ''; // document.currentScript?.getAttribute('data-base-url') || ''
+import { getPageResourceUrl } from './extension-resources';
 
 export default class Ambientlight {
   innerStrength = 2;
@@ -2181,6 +2180,13 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     document.body.toggleAttribute('data-ambientlight-fixed', enable);
   }
 
+  getNoiseImageCssUrl(index) {
+    const url = getPageResourceUrl(`images/noise-${index}.png`, () =>
+      this.updateStyles()
+    );
+    return url ? `url('${url}')` : '';
+  }
+
   updateStyles() {
     this.updateFixedStyle();
 
@@ -2412,7 +2418,7 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
       document.body,
       '--ytal-video-debanding-background',
       videoDebandingStrength
-        ? `url('${baseUrl}images/noise-${videoNoiseImageIndex}.png')`
+        ? this.getNoiseImageCssUrl(videoNoiseImageIndex)
         : ''
     );
     setStyleProperty(
@@ -2437,9 +2443,7 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     setStyleProperty(
       document.body,
       '--ytal-debanding-background',
-      debandingStrength
-        ? `url('${baseUrl}images/noise-${noiseImageIndex}.png')`
-        : ''
+      debandingStrength ? this.getNoiseImageCssUrl(noiseImageIndex) : ''
     );
     setStyleProperty(
       document.body,

@@ -11,6 +11,7 @@ import SentryReporter, {
   setVersion,
 } from './libs/errors/sentry-reporter';
 import { injectedScript } from './libs/messaging/injected';
+import { isLoadedByManifest } from './libs/extension-resources';
 
 setErrorHandler((ex) => SentryReporter.captureException(ex));
 
@@ -188,7 +189,14 @@ async function loadContentScriptResources() {
     return;
   }
 
+  // Safari injects these files via the manifest, because the YouTube page is
+  // not allowed to load files of the extension
   let loaded = await new Promise((resolve) => {
+    if (isLoadedByManifest('styles/content.css')) {
+      resolve(true);
+      return;
+    }
+
     let url;
     try {
       url = chrome.runtime.getURL('styles/content.css');
@@ -228,6 +236,11 @@ async function loadContentScriptResources() {
   if (!loaded) return;
 
   loaded = await new Promise((resolve) => {
+    if (isLoadedByManifest('scripts/injected.js')) {
+      resolve(true);
+      return;
+    }
+
     let url;
     try {
       url = chrome.runtime.getURL('scripts/injected.js');
