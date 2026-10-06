@@ -2,6 +2,8 @@ const getOS = () => {
   try {
     const list = [
       { match: 'window', name: 'Windows' },
+      { match: 'iphone', name: 'iOS' },
+      { match: 'ipad', name: 'iOS' },
       { match: 'mac', name: 'Mac' },
       { match: 'cros', name: 'Chrome+OS' },
       { match: 'ubuntu', name: 'Ubuntu+(Linux)' },
@@ -22,6 +24,8 @@ const browsersUAList = [
   { ua: 'OPR', name: 'Opera' },
   { ua: 'Edg', name: 'Edge' },
   { ua: 'Chrome', name: 'Chrome' },
+  // Must be last, because the user agent of most other browsers also contains "Safari"
+  { ua: 'Safari', name: 'Safari', versionUA: 'Version' },
 ];
 
 export const getBrowser = () => {
@@ -39,9 +43,10 @@ export const getBrowser = () => {
 const getBrowserVersion = () => {
   try {
     const browserName = getBrowser();
-    const browserUA = browsersUAList.find(
+    const browser = browsersUAList.find(
       (browser) => browserName === browser.name
-    ).ua;
+    );
+    const browserUA = browser.versionUA ?? browser.ua;
     const ua = globalThis.navigator.userAgent;
     const matches = ua.match(`${browserUA}/([0-9.]+)`);
     return matches.length === 2 ? matches[1] : ua;

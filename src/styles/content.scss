@@ -110,6 +110,7 @@
   color: #fff;
   font-size: 18px;
   pointer-events: none;
+  -webkit-user-select: none;
   user-select: none;
   overflow: hidden;
   contain: strict;
@@ -398,6 +399,7 @@ html[data-ambientlight-enabled] {
         ytd-masthead {
           &,
           &[dark] {
+            -webkit-backdrop-filter: blur(30px);
             backdrop-filter: blur(30px);
             --yt-spec-outline: rgba(0,0,0,.1);
             --yt-spec-static-overlay-button-primary: rgba(0,0,0, .1);
@@ -559,6 +561,7 @@ html[data-ambientlight-enabled] {
 
   .ytwTimelineChapterViewModelHost {
     background: none !important;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
   }
 
@@ -1259,6 +1262,7 @@ html[data-ambientlight-enabled] {
     &[active],
     &:hover:not(.dragging) {
       background-color: var(--ytal-background-10-percent) !important;
+      -webkit-backdrop-filter: saturate(1.1);
       backdrop-filter: saturate(1.1);
     }
     &[selected],
@@ -1340,6 +1344,7 @@ html[data-ambientlight-enabled] {
     ytd-playlist-panel-video-renderer {
       &[selected],
       &:hover:not(.dragging) {
+        -webkit-backdrop-filter: saturate(1.15);
         backdrop-filter: saturate(1.15);
       }
       &[selected] {
@@ -1387,6 +1392,7 @@ html[data-ambientlight-enabled] {
     display: block;
     overflow: hidden;
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
     contain: strict;
     // will-change: transform; // Improves resizing performance, but reduces cpu rendering performance
@@ -1426,6 +1432,7 @@ html[data-ambientlight-enabled] {
     width: 100%;
     height: 1px;
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
   }
 
@@ -1480,6 +1487,7 @@ html[data-ambientlight-enabled] {
     height: 1px;
     margin-top: 0px;
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
     transform-origin: center center;
     transform: var(--video-transform);
@@ -1510,6 +1518,7 @@ html[data-ambientlight-enabled] {
     height: 1px;
     margin-top: 0px;
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
 
     transform-origin: center center;
@@ -1851,6 +1860,7 @@ html[data-ambientlight-enabled] {
   opacity: 0 !important;
   transition: none !important;
   pointer-events: none;
+  -webkit-user-select: none;
   user-select: none;
 
   .ytp-big-mode & {
@@ -2172,6 +2182,7 @@ html[data-ambientlight-enabled] {
         content: 'N';
         position: absolute;
         pointer-events: none;
+        -webkit-user-select: none;
         user-select: none;
         top: 0;
         left: 2px;
@@ -2205,6 +2216,7 @@ html[data-ambientlight-enabled] {
         content: 'New';
         position: absolute;
         pointer-events: none;
+        -webkit-user-select: none;
         user-select: none;
         top: 0;
         left: 2px;
@@ -2322,6 +2334,7 @@ html[data-ambientlight-enabled] {
     margin-bottom: 8px;
     padding-top: 20px;
     padding-bottom: 15px;
+    -webkit-user-select: text;
     user-select: text;
     cursor: default !important;
     &,
@@ -2547,6 +2560,7 @@ html[data-ambientlight-enabled] {
         fill: #eee;
         cursor: help;
         pointer-events: none;
+        -webkit-user-select: none;
         user-select: none;
       }
       .ytp-big-mode & {
@@ -2941,6 +2955,7 @@ html[data-ambientlight-enabled] {
   // Comment on the side - Fixes infinte scrolling in comments when being scrolled down 
   ytd-watch-fixie {
     ytd-item-section-renderer[static-comments-header] #header.ytd-item-section-renderer {
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       position: sticky;
       bottom: 0;
@@ -3340,6 +3355,7 @@ html[data-ambientlight-enabled] {
 
   .button-container.ytd-rich-shelf-renderer {
     background: none !important;
+    -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
   }
 }

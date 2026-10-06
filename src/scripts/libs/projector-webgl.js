@@ -543,7 +543,7 @@ export default class ProjectorWebGL {
     }
 
     if (!this.elem) {
-      this.elem = new SafeOffscreenCanvas(1, 1);
+      this.elem = new SafeOffscreenCanvas(1, 1, false, true);
       this.elem.addEventListener('webglcontextlost', this.onCtxLost, false);
       this.elem.addEventListener(
         'webglcontextrestored',

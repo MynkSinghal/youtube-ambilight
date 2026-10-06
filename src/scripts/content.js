@@ -14,6 +14,14 @@ import { injectedScript } from './libs/messaging/injected';
 
 setErrorHandler((ex) => SentryReporter.captureException(ex));
 
+// Resolves with true when the stylesheet and injected script have been loaded
+// and content-main.js is allowed to initialize. Content scripts share the
+// same isolated world window, so content-main.js can await this promise.
+let resolveContentScriptLoaded;
+window.ambientlightContentScriptLoaded = new Promise((resolve) => {
+  resolveContentScriptLoaded = resolve;
+});
+
 injectedScript.addMessageListener('error', (injectedEx) => {
   const ex = new Error(injectedEx.message);
   ex.name = injectedEx.name;
@@ -133,6 +141,14 @@ const captureResourceLoadingException = async (url, event) => {
 };
 
 wrapErrorHandler(async function loadContentScript() {
+  try {
+    await loadContentScriptResources();
+  } finally {
+    resolveContentScriptLoaded(false); // No-op when already resolved with true
+  }
+})();
+
+async function loadContentScriptResources() {
   const version = getVersion();
   setVersion(version);
 
@@ -247,6 +263,12 @@ wrapErrorHandler(async function loadContentScript() {
   }
   if (!loaded) return;
 
+  resolveContentScriptLoaded(true);
+
+  // Safari does not support dynamic imports in content scripts. Instead, the
+  // Safari manifest loads content-main.js as a content script after this one.
+  if (window.ambientlightContentMainLoaded) return;
+
   let scriptUrl;
   try {
     scriptUrl = chrome.runtime.getURL('scripts/content-main.js');
@@ -260,4 +282,4 @@ wrapErrorHandler(async function loadContentScript() {
   } catch (error) {
     await captureResourceLoadingException(scriptUrl, error);
   }
-})();
+}

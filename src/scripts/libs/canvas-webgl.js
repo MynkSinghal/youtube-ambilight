@@ -3,6 +3,7 @@ import {
   canvasWebGLCrashTips,
   ctxOptions,
   requestIdleCallback,
+  SafeOffscreenCanvas,
   webGLErrorToString,
   wrapErrorHandler,
 } from './generic';
@@ -27,13 +28,7 @@ import {
 
 export class WebGLOffscreenCanvas {
   constructor(width, height, ambientlight, settings) {
-    if (typeof OffscreenCanvas !== 'undefined') {
-      this.canvas = new OffscreenCanvas(width, height);
-    } else {
-      this.canvas = document.createElement('canvas');
-      this.canvas.width = width;
-      this.canvas.height = height;
-    }
+    this.canvas = new SafeOffscreenCanvas(width, height, false, true);
 
     this.canvas._getContext = this.canvas.getContext;
     this.canvas.getContext = async (type, options = {}) => {

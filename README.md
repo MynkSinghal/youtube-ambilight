@@ -41,6 +41,7 @@ With a score lower than 1000 the extension will still work but it is likely that
 | -------- | ------- | ------ |
 | Chromium | 80      | [Optional chaining operator (?.)](https://caniuse.com/mdn-javascript_operators_optional_chaining) |
 | Firefox  | 74      | [Optional chaining operator (?.)](https://caniuse.com/mdn-javascript_operators_optional_chaining) |
+| Safari   | 17      | [WebGL in OffscreenCanvas](https://caniuse.com/offscreencanvas), [Fullscreen API](https://caniuse.com/fullscreen) and [requestVideoFrameCallback](https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback) (macOS, and iPadOS when YouTube is opened as a desktop website) |
 
 
 ## Privacy & Security
@@ -71,3 +72,20 @@ Feel free to
 5. After you've modified a file in the `/src` folder follow these steps:
     1. In the terminal/commandline enter `npm run build`
     2. In Chrome go to the url [chrome://extensions/](chrome://extensions/) and click the refresh/update button in the card of the extension.
+
+### Safari
+Safari extensions are distributed inside a macOS/iOS app, which requires a Mac with [Xcode](https://developer.apple.com/xcode/).
+1. In the terminal enter `npm install`.
+2. In the terminal enter `npm run package:safari`. This builds the Safari version of the extension in the `/dist-safari` folder and generates an Xcode project in the `/safari` folder (using `xcrun safari-web-extension-converter`).
+    > Set the `SAFARI_BUNDLE_IDENTIFIER` environment variable to use your own bundle identifier (default: `com.wesselkroos.youtube-ambilight`).
+3. Open the Xcode project in the `/safari` folder, select the `Ambient light for YouTube (macOS)` scheme and click Run. This builds and opens the containing app.
+4. Allow unsigned extensions in Safari (Only needed when the app is not signed with a developer certificate):
+    1. In Safari open `Settings` > `Advanced` and turn on `Show features for web developers`.
+    2. In Safari open `Settings` > `Developer` and turn on `Allow unsigned extensions`.
+5. In Safari open `Settings` > `Extensions`, turn on `Ambient light for YouTube™` and allow it on `www.youtube.com`.
+6. After you've modified a file in the `/src` folder enter `npm run build:safari` in the terminal and run the app in Xcode again. The Xcode project references the `/dist-safari` folder, so it does not have to be regenerated.
+
+The Safari version is built from the same source code. The differences are in the manifest (see `safari-build.js`):
+- `content-main.js` is loaded as a content script, because Safari does not support dynamic imports in content scripts.
+- Additional icon sizes, which are also used for the app icon.
+- The settings page opens in a tab, because file dialogs and downloads close the popup in Safari.

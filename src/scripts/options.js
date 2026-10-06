@@ -1,8 +1,29 @@
 import { defaultCrashOptions, storage } from './libs/storage';
 import { syncStorage } from './libs/sync-storage';
-import { getFeedbackFormLink, getPrivacyPolicyLink } from './libs/utils';
+import {
+  getBrowser,
+  getFeedbackFormLink,
+  getPrivacyPolicyLink,
+} from './libs/utils';
 import SettingsConfig from './libs/settings-config';
 import { on } from './libs/generic';
+import { isStorageChangedSupported } from './libs/storage-changed';
+
+// Safari closes the extension popup as soon as a file dialog or download
+// is opened. In that case these actions are continued in a new tab.
+const isSafariPopup =
+  getBrowser() === 'Safari' &&
+  new URLSearchParams(location.search).get('view') !== 'tab' &&
+  window.innerWidth < 600;
+const openInTab = () => {
+  const url = chrome.runtime.getURL('options.html?view=tab');
+  if (chrome.tabs?.create) {
+    chrome.tabs.create({ url });
+  } else {
+    window.open(url, '_blank');
+  }
+  window.close();
+};
 
 document.querySelector('#feedbackFormLink').href = getFeedbackFormLink();
 document.querySelector('#privacyPolicyLink').href = getPrivacyPolicyLink();
@@ -46,7 +67,7 @@ for (const elem of toggles) {
   });
 }
 
-if (!chrome?.storage?.local?.onChanged) {
+if (!isStorageChangedSupported()) {
   const synchronizationWarning = document.createElement('div');
   synchronizationWarning.textContent =
     "Unable to synchronize any crash option changes to youtube pages that are already open. Make sure to refresh any open youtube pages after you've changed an option.";
@@ -256,11 +277,15 @@ on(importFileInput, 'change', async () => {
     });
   });
 });
-on(importFileButton, 'click', () => importFileInput.click());
+on(importFileButton, 'click', () => {
+  if (isSafariPopup) return openInTab();
+  importFileInput.click();
+});
 
 let exportedSettingsLink;
 const exportFileButton = document.querySelector('#exportFileBtn');
 on(exportFileButton, 'click', async () => {
+  if (isSafariPopup) return openInTab();
   await exportSettings('', (jsonString) => {
     const blob = new Blob([jsonString], { type: 'text/plain' });
 
@@ -314,11 +339,18 @@ const updateImportableAccountStatus = async () => {
     importAccountButton.disabled = true;
   }
 };
-updateImportableAccountStatus();
+if (chrome?.storage?.sync) {
+  updateImportableAccountStatus();
 
-if (chrome?.storage?.sync?.onChanged) {
-  syncStorage.addListener(updateImportableAccountStatus);
-  on(window, 'beforeunload', () => {
-    syncStorage.removeListener(updateImportableAccountStatus);
-  });
+  if (isStorageChangedSupported()) {
+    syncStorage.addListener(updateImportableAccountStatus);
+    on(window, 'beforeunload', () => {
+      syncStorage.removeListener(updateImportableAccountStatus);
+    });
+  }
+} else {
+  // The browser has no storage.sync area (cloud storage)
+  for (const elem of document.querySelectorAll('.cloud-storage')) {
+    elem.style.display = 'none';
+  }
 }

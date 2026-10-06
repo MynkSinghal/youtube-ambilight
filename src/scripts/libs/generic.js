@@ -320,9 +320,34 @@ export class Canvas {
   }
 }
 
+// Safari 16.4 - 16.x supports OffscreenCanvas, but only with a 2d context
+let _supportsOffscreenWebGL;
+export const supportsOffscreenWebGL = () => {
+  if (_supportsOffscreenWebGL === undefined) {
+    try {
+      if (typeof OffscreenCanvas === 'undefined') {
+        _supportsOffscreenWebGL = false;
+      } else {
+        const ctx =
+          new OffscreenCanvas(1, 1).getContext('webgl2') ||
+          new OffscreenCanvas(1, 1).getContext('webgl');
+        _supportsOffscreenWebGL = !!ctx;
+        // Free the context immediately, browsers limit the amount of active contexts
+        ctx?.getExtension('WEBGL_lose_context')?.loseContext();
+      }
+    } catch {
+      _supportsOffscreenWebGL = false;
+    }
+  }
+  return _supportsOffscreenWebGL;
+};
+
 export class SafeOffscreenCanvas {
-  constructor(width, height, pixelated) {
-    if (typeof OffscreenCanvas !== 'undefined') {
+  constructor(width, height, pixelated, webGL = false) {
+    if (
+      typeof OffscreenCanvas !== 'undefined' &&
+      (!webGL || supportsOffscreenWebGL())
+    ) {
       return new OffscreenCanvas(width, height);
     } else {
       const canvas = document.createElement('canvas');

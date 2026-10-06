@@ -1,4 +1,5 @@
-import { appendErrorStack, wrapErrorHandler } from './generic';
+import { appendErrorStack } from './generic';
+import { StorageChangedListeners } from './storage-changed';
 
 class Storage {
   async set(
@@ -95,13 +96,11 @@ class Storage {
     }
   }
 
-  onChangedListeners = [];
+  onChangedListeners = new StorageChangedListeners('local');
 
   addListener(handler) {
     try {
-      const wrappedHandler = wrapErrorHandler(handler, true);
-      chrome.storage.local.onChanged.addListener(wrappedHandler);
-      this.onChangedListeners.push({ handler, wrappedHandler });
+      this.onChangedListeners.add(handler);
     } catch (ex) {
       console.warn(
         "Failed to listen to storage changes. If any setting changes you'll have to manually refresh the page to update them."
@@ -112,17 +111,7 @@ class Storage {
 
   removeListener(handler) {
     try {
-      const entry = this.onChangedListeners.find(
-        (entry) => entry.handler === handler
-      );
-      if (!entry)
-        throw new Error(
-          'Cannot remove a storage.local.onChange listener that has never been added'
-        );
-
-      chrome.storage.local.onChanged.removeListener(entry.wrappedHandler);
-
-      this.onChangedListeners.splice(this.onChangedListeners.indexOf(entry), 1);
+      this.onChangedListeners.remove(handler);
     } catch {
       console.warn(
         "Failed to listen to storage changes. If any setting changes you'll have to manually refresh the page to update them."

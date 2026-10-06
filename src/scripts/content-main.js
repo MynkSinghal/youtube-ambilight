@@ -26,6 +26,10 @@ import { contentScript } from './libs/messaging/content';
 import { getVersion } from './libs/utils';
 import { defaultCrashOptions, storage } from './libs/storage';
 
+// Tells content.js that this script has been loaded as a content script by
+// the manifest (Safari) and does not have to be imported dynamically
+window.ambientlightContentMainLoaded = true;
+
 setErrorHandler((ex) => SentryReporter.captureException(ex));
 
 wrapErrorHandler(async function initVersionAndCrashOptions() {
@@ -459,8 +463,15 @@ const onLoad = wrapErrorHandler(async function onLoadCallback() {
   await loadAmbientlight();
 });
 
-(function setup() {
+(async function setup() {
   try {
+    // Wait until content.js has loaded the stylesheet and injected script
+    if (
+      window.ambientlightContentScriptLoaded &&
+      !(await window.ambientlightContentScriptLoaded)
+    )
+      return;
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', onLoad, { once: true });
     } else {
